@@ -78,11 +78,12 @@ class DatabaseConnection {
         localStorage.setItem('users', JSON.stringify(this.users))
     }
 
-    addOrder(userEmail, total, cart, address, paymentMethod) {
+
+    addOrder(total, address, paymentMethod) {
         this.orders.push({
-            userEmail: userEmail,
+            userEmail: this.currentUser.email,
+            cart: this.cart,
             total: total,
-            cart: cart,
             address: address,
             paymentMethod: paymentMethod,
         })
@@ -520,7 +521,7 @@ function makeOrder() {
         return;
     }
 
-    databaseConnection.addOrder(databaseConnection.currentUser.email, total, address, payment);
+    databaseConnection.addOrder(total, address, payment);
     databaseConnection.removeCart();
 
     alert('Pedido realizado com sucesso!');
@@ -529,9 +530,40 @@ function makeOrder() {
 
 function loadUserInfo() {
     var currentUser = databaseConnection.currentUserInfo();
-
+    
     document.getElementById('name').textContent = currentUser.name;
     document.getElementById('email').textContent = currentUser.email;
+    
+    var orders = databaseConnection.userOrders(currentUser.email);
+
+    var ordersContainer = document.querySelector('#orders');
+
+    var header = document.createElement('div');
+    header.className = 'cart-item';
+    header.innerHTML = `
+    <li class="list-group-item d-flex justify-content-between lh-sm align-middle">
+        <span style="margin-top: 32px; margin-left: 16px;">Total</span>
+        <span style="margin-top: 32px;">Forma de Pagamento</span>
+        <span style="margin-top: 32px; margin-right: 16px;">Endereço</span>
+
+    </li>
+    `;
+    ordersContainer.appendChild(header);
+
+    orders.forEach(item => {
+        var itemElement = document.createElement('div');
+        itemElement.className = 'cart-item';
+        itemElement.innerHTML = `
+        <li class="list-group-item d-flex justify-content-between lh-sm align-middle">
+            <span style="margin-top: 32px; margin-left: 16px;">${item.total}</span>
+            <span style="margin-top: 32px;">${item.paymentMethod}</span>
+            <span style="margin-top: 32px; margin-right: 16px;">${item.address}</span>
+
+        </li>
+        `;
+
+        ordersContainer.appendChild(itemElement);
+    });
 }
 
 function loadCheckoutInfo() {
