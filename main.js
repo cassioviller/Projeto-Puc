@@ -583,7 +583,7 @@ function loadCheckoutInfo() {
         itemElement.className = 'cart-item';
         itemElement.innerHTML = `
         <li class="list-group-item d-flex justify-content-between lh-sm align-middle">
-            <img src="${item.image}" alt="${item.id}" style="width: 50px; height: 50px; margin: 16px">
+            <img src="${item.image}" alt="${item.id}" style="width: 70px; height: 50px; margin: 16px">
             <span style="margin-top: 32px; font-weight: bold">${item.id}</span>
             <span style="margin-top: 32px">Quantidade: ${item.quantity}</span>
             <span style="margin-top: 32px; margin-right: 16px;">Preço: ${item.price}</span>
