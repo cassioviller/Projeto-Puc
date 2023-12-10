@@ -65,14 +65,14 @@ class DatabaseConnection {
         this.users = JSON.parse(localStorage.getItem('users')) || []
         this.orders = JSON.parse(localStorage.getItem('orders')) || []
         this.cart = JSON.parse(localStorage.getItem('cart')) || []
+        this.currentUser = JSON.parse(localStorage.getItem('currentUser')) || null
     }
 
-    addUser(email, password, name, address) {
+    addUser(email, password, name) {
         this.users.push({
             email: email,
             password: encrypt(email, password),
             name: name,
-            address: address
         })
 
         localStorage.setItem('users', JSON.stringify(this.users))
@@ -90,7 +90,7 @@ class DatabaseConnection {
 
     addCartItem(productId, quantity, price, image) {
         this.cart.push({
-            productId: productId,
+            id: productId,
             quantity: quantity, 
             price: price,
             image: image
@@ -102,6 +102,21 @@ class DatabaseConnection {
     removeCart() {
         this.cart = [];
         localStorage.setItem('cart', JSON.stringify(this.cart));
+    }
+
+    setCurrentUser(email, validUntil) {
+        this.currentUser = {
+            email: email,
+            validUntil: validUntil
+        }
+
+        localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
+    }
+
+    removeCurrentUser() {
+        this.currentUser = null
+
+        localStorage.removeItem('currentUser')
     }
 }
 
@@ -393,20 +408,9 @@ document.getElementById('checkoutButton').addEventListener('click', function() {
     if (databaseConnection.cart.length === 0) {
         alert('Seu carrinho está vazio!');
     } else {
-        alert('Compra finalizada com sucesso!');
-        databaseConnection.removeCart(); // Esvazia o carrinho
-        updateCartUI(); // Atualiza a interface do usuário
+        checkLogin('checkout.html');
     }
 });
-
-function cacheCurrentUser(email) {
-    cacheData = {
-        email: email,
-        validUntil: new Date().getTime() + 300000 // 5 minutos
-    }
-
-    localStorage.setItem('currentUser', JSON.stringify(cacheData));
-}
 
 // Função para cadastrar um novo usuário
 function register() {
@@ -414,7 +418,6 @@ function register() {
     var password = document.getElementById('password').value;
     var confirmPassword = document.getElementById('confirmPassword').value;
     var name = document.getElementById('name').value;
-    var address = document.getElementById('address').value;
 
     if (password !== confirmPassword) {
         alert('As senhas não conferem!');
@@ -427,9 +430,9 @@ function register() {
         return;
     }
 
-    cacheCurrentUser(email);
+    databaseConnection.setCurrentUser(email, new Date().getTime() + 300000);
 
-    databaseConnection.addUser(email, password, name, address);
+    databaseConnection.addUser(email, password, name);
 
     alert('Usuário cadastrado com sucesso!');
     window.location.href = 'index.html';
@@ -450,7 +453,7 @@ function login() {
     var validPassword = password && encrypt(email, password) === user.password;
 
     if (user && validPassword) {
-        cacheCurrentUser(email);
+        databaseConnection.setCurrentUser(email, new Date().getTime() + 300000);
 
         window.location.href = 'index.html';
     } else {
@@ -459,28 +462,30 @@ function login() {
 }
 
 // Função para verificar se o usuário está logado
-function checkLogin() {
-    var storedData = localStorage.getItem('currentUser');
-    if (!storedData) {
+function checkLogin(goToPage = "user.html") {
+    var currentUser = databaseConnection.currentUser;
+    if (!currentUser) {
         window.location.href = 'login_or_register.html';
+        return;
     }
 
-    var currentUser = JSON.parse(storedData);
     var validUntil = currentUser.validUntil;
-
     if (validUntil < new Date().getTime()) {
-        localStorage.removeItem('user');
+        databaseConnection.removeCurrentUser();
+
         alert('Sessão expirada! Faça login novamente.');
         window.location.href = 'login_or_register.html';
         return;
     }
 
-    window.location.href = 'user.html';
+    window.location.href = goToPage;
 }
 
 // Função para fazer logout
 function logout() {
-    localStorage.removeItem('currentUser');
+    databaseConnection.removeCurrentUser();
+    databaseConnection.removeCart();
+
     window.location.href = 'index.html';
 }
 
