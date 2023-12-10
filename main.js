@@ -544,21 +544,26 @@ function loadUserInfo() {
     <li class="list-group-item d-flex justify-content-between lh-sm align-middle">
         <span style="margin-top: 32px; margin-left: 16px;">Total</span>
         <span style="margin-top: 32px;">Forma de Pagamento</span>
-        <span style="margin-top: 32px; margin-right: 16px;">Endereço</span>
+        <span style="margin-top: 32px;">Endereço</span>
+        <span style="margin-top: 32px; margin-right: 16px;">Items</span>
 
     </li>
     `;
     ordersContainer.appendChild(header);
 
     orders.forEach(item => {
+        cartItems = item.cart.map(cartItem => {
+            return `${cartItem.id} - ${cartItem.quantity}x`;
+        }).join('<br>');
+
         var itemElement = document.createElement('div');
         itemElement.className = 'cart-item';
         itemElement.innerHTML = `
         <li class="list-group-item d-flex justify-content-between lh-sm align-middle">
             <span style="margin-top: 32px; margin-left: 16px;">${item.total}</span>
             <span style="margin-top: 32px;">${item.paymentMethod}</span>
-            <span style="margin-top: 32px; margin-right: 16px;">${item.address}</span>
-
+            <span style="margin-top: 32px;">${item.address}</span>
+            <span style="margin-top: 32px; margin-right: 16px;">${cartItems}</span>
         </li>
         `;
 
