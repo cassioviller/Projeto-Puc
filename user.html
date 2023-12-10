@@ -119,6 +119,35 @@
         #page {
             margin-top: 100px;
         }
+
+        #ordersTable {
+            height: 100%;
+            width: 1000px;
+            border-color: #212529;
+            border-style: solid;
+            border-radius: 10;
+
+        }
+
+        #ordersTable tr {
+            color: #000000;
+            border-bottom: 1px solid #212529;
+        }
+
+        #ordersTable th {
+            background-color: #f7aa83;
+            color: #000000;
+            padding: 8px;
+            text-align: center;
+        }
+
+        #ordersTable td {
+            border-style: solid;
+            color: #000000;
+            padding: 8px;
+            text-align: center;
+
+        }
     </style>
 </head>
 
@@ -159,15 +188,34 @@
             <div class="row">
                 <h3>Informações pessoais</h3>
 
-                <span>Nome: </span><br>
+                <br>
+                <br>
+
+                <span style="font-weight: bold;">Nome: </span>
                 <span id="name"></span><br><br>
 
-                <span>Email: </span><br>
+                <span style="font-weight: bold;">Email: </span>
                 <span id="email"></span><br><br>
-                
-                <h3>Histórico de pedidos</h3>
 
-                <span id="orders"></span>
+                <br>
+
+
+                <h3>Histórico de pedidos</h3>
+                <br>
+                <br>
+
+                <table id="ordersTable">
+                    <thead>
+                        <tr>
+                            <th>Itens</th>
+                            <th>Total</th>
+                            <th>Forma de Pagamento</th>
+                            <th>Endereço</tr>
+                        </tr>
+                    </thead>
+                    <tbody id="orders">
+                    </tbody>
+                </table>
             </div>
         </div>
     </main>

@@ -544,33 +544,17 @@ function loadUserInfo() {
 
     var ordersContainer = document.querySelector('#orders');
 
-    var header = document.createElement('div');
-    header.className = 'cart-item';
-    header.innerHTML = `
-    <li class="list-group-item d-flex justify-content-between lh-sm align-middle">
-        <span style="margin-top: 32px; margin-left: 16px;">Total</span>
-        <span style="margin-top: 32px;">Forma de Pagamento</span>
-        <span style="margin-top: 32px;">Endereço</span>
-        <span style="margin-top: 32px; margin-right: 16px;">Items</span>
-
-    </li>
-    `;
-    ordersContainer.appendChild(header);
-
     orders.forEach(item => {
         cartItems = item.cart.map(cartItem => {
-            return `${cartItem.id} - ${cartItem.quantity}x`;
+            return `- ${cartItem.id} - ${cartItem.quantity}x`;
         }).join('<br>');
 
-        var itemElement = document.createElement('div');
-        itemElement.className = 'cart-item';
+        var itemElement = document.createElement('tr');
         itemElement.innerHTML = `
-        <li class="list-group-item d-flex justify-content-between lh-sm align-middle">
-            <span style="margin-top: 32px; margin-left: 16px;">${item.total}</span>
-            <span style="margin-top: 32px;">${item.paymentMethod}</span>
-            <span style="margin-top: 32px;">${item.address}</span>
-            <span style="margin-top: 32px; margin-right: 16px;">${cartItems}</span>
-        </li>
+            <td style="text-align: left !important">${cartItems}</td>
+            <td>${item.address}</td>
+            <td>${item.paymentMethod}</td>
+            <td>R\$ ${item.total}</td>
         `;
 
         ordersContainer.appendChild(itemElement);
