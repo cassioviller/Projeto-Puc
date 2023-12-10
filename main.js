@@ -343,7 +343,7 @@ function removeFromCart(productId) {
 
 // Função para calcular o total do carrinho
 function calculateCartTotal() {
-    var total = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+    var total = databaseConnection.cart.reduce((total, item) => total + (item.price * item.quantity), 0);
     return total.toFixed(2);
 }
 
@@ -430,7 +430,7 @@ function register() {
         return;
     }
 
-    databaseConnection.setCurrentUser(email, new Date().getTime() + 300000);
+    databaseConnection.setCurrentUser(email, new Date().getTime() + 3000000);
 
     databaseConnection.addUser(email, password, name);
 
@@ -453,7 +453,7 @@ function login() {
     var validPassword = password && encrypt(email, password) === user.password;
 
     if (user && validPassword) {
-        databaseConnection.setCurrentUser(email, new Date().getTime() + 300000);
+        databaseConnection.setCurrentUser(email, new Date().getTime() + 3000000);
 
         window.location.href = 'index.html';
     } else {
@@ -487,6 +487,26 @@ function logout() {
     databaseConnection.removeCart();
 
     window.location.href = 'index.html';
+}
+
+function makeOrder() {
+    var total = calculateCartTotal();
+    var address = document.getElementById('address').value;
+    var payment = document.getElementById('payment').value;
+    var items = databaseConnection.cart.map(item => {
+        return {
+            id: item.id,
+            quantity: item.quantity,
+            price: item.price
+        }
+    });
+
+
+    databaseConnection.addOrder(databaseConnection.currentUser.email, total, items, address, payment);
+    databaseConnection.removeCart();
+
+    alert('Pedido realizado com sucesso!');
+    window.location.href = 'user.html';
 }
 
 updateCartUI()
