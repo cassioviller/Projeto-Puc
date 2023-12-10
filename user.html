@@ -120,29 +120,31 @@
             margin-top: 100px;
         }
 
-        #ordersTable {
+        .customTable {
             height: 100%;
-            width: 1000px;
+            width: 100%;
             border-color: #212529;
             border-style: solid;
-            border-radius: 10;
-
+            border-radius: 10px !important;
         }
 
-        #ordersTable tr {
+        .customTable tr {
             color: #000000;
             border-bottom: 1px solid #212529;
+            border-radius: 10px !important;
+
         }
 
-        #ordersTable th {
+        .customTable th {
             background-color: #f7aa83;
             color: #000000;
             padding: 8px;
             text-align: center;
         }
 
-        #ordersTable td {
+        .customTable td {
             border-style: solid;
+            border-radius: 10px !important;
             color: #000000;
             padding: 8px;
             text-align: center;
@@ -186,25 +188,34 @@
     <main class="py-5">
         <div class="container" id="page">
             <div class="row">
-                <h3>Informações pessoais</h3>
-
-                <br>
-                <br>
-
-                <span style="font-weight: bold;">Nome: </span>
-                <span id="name"></span><br><br>
-
-                <span style="font-weight: bold;">Email: </span>
-                <span id="email"></span><br><br>
+                <h3 style="text-align: center;">Informações pessoais</h3>
 
                 <br>
 
+                <table class="customTable">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Email</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td id="name"></td>
+                            <td id="email"></td>
+                        </tr>
+                    </tbody>
+                </table>
 
-                <h3>Histórico de pedidos</h3>
-                <br>
                 <br>
 
-                <table id="ordersTable">
+
+
+                <h3 style="text-align: center; margin-top: 100px;">Histórico de pedidos</h3>
+
+                <br>
+
+                <table class="customTable">
                     <thead>
                         <tr>
                             <th>Itens</th>
