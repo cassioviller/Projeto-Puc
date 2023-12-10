@@ -78,11 +78,13 @@ class DatabaseConnection {
         localStorage.setItem('users', JSON.stringify(this.users))
     }
 
-    addOrder(userEmail, total, items) {
+    addOrder(userEmail, total, cart, address, paymentMethod) {
         this.orders.push({
             userEmail: userEmail,
             total: total,
-            items: items
+            cart: cart,
+            address: address,
+            paymentMethod: paymentMethod,
         })
 
         localStorage.setItem('orders', JSON.stringify(this.orders))
@@ -117,6 +119,18 @@ class DatabaseConnection {
         this.currentUser = null
 
         localStorage.removeItem('currentUser')
+    }
+
+    findUser(email) {
+        return this.users.find(user => user.email === email)
+    }
+
+    currentUserInfo() {
+        return this.findUser(this.currentUser?.email)
+    }
+
+    userOrders(email) {
+        return this.orders.filter(order => order.userEmail === email)
     }
 }
 
@@ -315,7 +329,9 @@ function addToCart(productId, productPrice, productImage) {
 document.querySelectorAll('.dish-add-btn').forEach(button => {
     button.addEventListener('click', function() {
         var productId = this.getAttribute('data-id');
-        var productPrice = parseFloat(this.getAttribute('data-price'));
+        var productPrice = parseFloat(this.getAttribute('data-price').replace(",", "."));
+        console.log(productPrice);
+        console.log(productPrice);
         var productImage = this.getAttribute('data-image');
         addToCart(productId, productPrice, productImage);
     });
@@ -348,8 +364,8 @@ function calculateCartTotal() {
 }
 
 // Função para renderizar os itens do carrinho no modal
-function renderCartItems() {
-    var cartItemsContainer = document.querySelector('#cartModal .modal-body');
+function renderCartItems(selector = '#cartModal .modal-body') {
+    var cartItemsContainer = document.querySelector(selector);
     cartItemsContainer.innerHTML = '';
 
     databaseConnection.cart.forEach(item => {
@@ -424,7 +440,7 @@ function register() {
         return;
     }
 
-    databaseUser = databaseConnection.users.find(user => user.email === email);
+    databaseUser = databaseConnection.findUser(email);
     if (databaseUser) {
         alert('Já existe um usuário cadastrado com esse e-mail!');
         return;
@@ -443,7 +459,7 @@ function login() {
     var email = document.getElementById('loginEmail').value;
     var password = document.getElementById('loginPassword').value;
 
-    var user = databaseConnection.users.find(user => user.email === email);
+    var user = databaseConnection.findUser(email);
 
     if (!user) {
         alert('Usuário ou senha incorretos!');
@@ -493,20 +509,65 @@ function makeOrder() {
     var total = calculateCartTotal();
     var address = document.getElementById('address').value;
     var payment = document.getElementById('payment').value;
-    var items = databaseConnection.cart.map(item => {
-        return {
-            id: item.id,
-            quantity: item.quantity,
-            price: item.price
-        }
-    });
 
+    if(!address) {
+        alert('Informe o endereço de entrega!');
+        return;
+    }
 
-    databaseConnection.addOrder(databaseConnection.currentUser.email, total, items, address, payment);
+    if(payment === 'INVALID') {
+        alert('Selecione um método de pagamento válido!');
+        return;
+    }
+
+    databaseConnection.addOrder(databaseConnection.currentUser.email, total, address, payment);
     databaseConnection.removeCart();
 
     alert('Pedido realizado com sucesso!');
     window.location.href = 'user.html';
+}
+
+function loadUserInfo() {
+    var currentUser = databaseConnection.currentUserInfo();
+
+    document.getElementById('name').textContent = currentUser.name;
+    document.getElementById('email').textContent = currentUser.email;
+}
+
+function loadCheckoutInfo() {
+    var currentUser = databaseConnection.currentUserInfo();
+
+    if(!currentUser) {
+        window.location.href = 'login_or_register.html';
+        return;
+    }
+    
+    var cart = databaseConnection.cart;
+    if(cart.length === 0) {
+        window.location.href = 'index.html';
+        return;
+    }
+
+    var cartItemsContainer = document.querySelector("#cart");
+    cartItemsContainer.innerHTML = '';
+
+    databaseConnection.cart.forEach(item => {
+        var itemElement = document.createElement('div');
+        itemElement.className = 'cart-item';
+        itemElement.innerHTML = `
+        <li class="list-group-item d-flex justify-content-between lh-sm align-middle">
+            <img src="${item.image}" alt="${item.id}" style="width: 50px; height: 50px; margin: 16px">
+            <span style="margin-top: 32px; font-weight: bold">${item.id}</span>
+            <span style="margin-top: 32px">Quantidade: ${item.quantity}</span>
+            <span style="margin-top: 32px; margin-right: 16px;">Preço: ${item.price}</span>
+
+        </li>
+        `;
+
+        cartItemsContainer.appendChild(itemElement);
+    });
+
+    document.getElementById('total').textContent = `R$ ${calculateCartTotal()}`;
 }
 
 updateCartUI()
