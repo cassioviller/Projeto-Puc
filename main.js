@@ -1,3 +1,112 @@
+function encrypt(alpha, betha) {
+    return btoa(alpha + betha);
+}
+
+// Estrutura de Dados dos Produtos
+const products = [
+    {
+        id: "insalata-caprese",
+        name: "Insalata Caprese",
+        price: 9.99,
+        image: "assets/images/dish/1.png",
+        calories: 300,
+        type: "Vegetariano",
+        servingSize: 1
+    },
+    {
+        id: "spaghetti-carbonara",
+        name: "Spaghetti Carbonara",
+        price: 12.99,
+        image: "assets/images/dish/2.png",
+        calories: 500,
+        type: "Não Veg",
+        servingSize: 1
+    },
+    {
+        id: "scaloppine-milanese",
+        name: "Scaloppine alla Milanese",
+        price: 15.99,
+        image: "assets/images/dish/3.png",
+        calories: 450,
+        type: "Não Veg",
+        servingSize: 1
+    },
+    {
+        id: "risotto-funghi",
+        name: "Risotto ai Funghi",
+        price: 13.50,
+        image: "assets/images/dish/4.png",
+        calories: 350,
+        type: "Vegetariano",
+        servingSize: 1
+    },
+    {
+        id: "branzino-grigliato",
+        name: "Branzino Grigliato",
+        price: 18.99,
+        image: "assets/images/dish/5.png",
+        calories: 300,
+        type: "Não Veg",
+        servingSize: 1
+    },
+    {
+        id: "tiramisu",
+        name: "Tiramisù",
+        price: 89.99,
+        image: "assets/images/dish/6.png",
+        calories: 420,
+        type: "Vegetarsiano",
+        servingSize: "1-2"
+    }
+];
+
+class DatabaseConnection {
+    constructor() {
+        this.users = JSON.parse(localStorage.getItem('users')) || []
+        this.orders = JSON.parse(localStorage.getItem('orders')) || []
+        this.cart = JSON.parse(localStorage.getItem('cart')) || []
+    }
+
+    addUser(email, password, name, address) {
+        this.users.push({
+            email: email,
+            password: encrypt(email, password),
+            name: name,
+            address: address
+        })
+
+        localStorage.setItem('users', JSON.stringify(this.users))
+    }
+
+    addOrder(userEmail, total, items) {
+        this.orders.push({
+            userEmail: userEmail,
+            total: total,
+            items: items
+        })
+
+        localStorage.setItem('orders', JSON.stringify(this.orders))
+    }
+
+    addCartItem(productId, quantity, price, image) {
+        this.cart.push({
+            productId: productId,
+            quantity: quantity, 
+            price: price,
+            image: image
+        });
+
+        localStorage.setItem('cart', JSON.stringify(this.cart));
+    }
+
+    removeCart() {
+        this.cart = [];
+        localStorage.setItem('cart', JSON.stringify(this.cart));
+    }
+}
+
+const databaseConnection = new DatabaseConnection();
+
 $(document).ready(function ($) {
     "use strict";
 
@@ -176,79 +285,13 @@ document.querySelector('.header-cart').addEventListener('click', function() {
     cartModal.show();
 });
 
-// Estrutura de Dados dos Produtos
-const products = [
-    {
-        id: "insalata-caprese",
-        name: "Insalata Caprese",
-        price: 9.99,
-        image: "assets/images/dish/1.png",
-        calories: 300,
-        type: "Vegetariano",
-        servingSize: 1
-    },
-    {
-        id: "spaghetti-carbonara",
-        name: "Spaghetti Carbonara",
-        price: 12.99,
-        image: "assets/images/dish/2.png",
-        calories: 500,
-        type: "Não Veg",
-        servingSize: 1
-    },
-    {
-        id: "scaloppine-milanese",
-        name: "Scaloppine alla Milanese",
-        price: 15.99,
-        image: "assets/images/dish/3.png",
-        calories: 450,
-        type: "Não Veg",
-        servingSize: 1
-    },
-    {
-        id: "risotto-funghi",
-        name: "Risotto ai Funghi",
-        price: 13.50,
-        image: "assets/images/dish/4.png",
-        calories: 350,
-        type: "Vegetariano",
-        servingSize: 1
-    },
-    {
-        id: "branzino-grigliato",
-        name: "Branzino Grigliato",
-        price: 18.99,
-        image: "assets/images/dish/5.png",
-        calories: 300,
-        type: "Não Veg",
-        servingSize: 1
-    },
-    {
-        id: "tiramisu",
-        name: "Tiramisù",
-        price: 89.99,
-        image: "assets/images/dish/6.png",
-        calories: 420,
-        type: "Vegetarsiano",
-        servingSize: "1-2"
-    }
-];
-
-// Estrutura inicial do carrinho
-var cart = [];
-
 // Função para adicionar ao carrinho
 function addToCart(productId, productPrice, productImage) {
-    var existingProduct = cart.find(product => product.id === productId);
+    var existingProduct = databaseConnection.cart.find(product => product.id === productId);
     if (existingProduct) {
         existingProduct.quantity += 1;
     } else {
-        cart.push({ 
-            id: productId, 
-            quantity: 1, 
-            price: productPrice,
-            image: productImage
-        });
+        databaseConnection.addCartItem(productId, 1, productPrice, productImage);
     }
     updateCartUI();
 }
@@ -265,7 +308,7 @@ document.querySelectorAll('.dish-add-btn').forEach(button => {
 
 // Função para atualizar a quantidade de um item no carrinho
 function updateItemQuantity(productId, newQuantity) {
-    var item = cart.find(item => item.id === productId);
+    var item = databaseConnection.cart.find(item => item.id === productId);
     if (item && newQuantity > 0) {
         item.quantity = newQuantity;
     } else if (item && newQuantity <= 0) {
@@ -276,9 +319,9 @@ function updateItemQuantity(productId, newQuantity) {
 
 // Função para remover um item do carrinho
 function removeFromCart(productId) {
-    var index = cart.findIndex(item => item.id === productId);
+    var index = databaseConnection.cart.findIndex(item => item.id === productId);
     if (index !== -1) {
-        cart.splice(index, 1);
+        databaseConnection.cart.splice(index, 1);
     }
     updateCartUI();
 }
@@ -294,7 +337,7 @@ function renderCartItems() {
     var cartItemsContainer = document.querySelector('#cartModal .modal-body');
     cartItemsContainer.innerHTML = '';
 
-    cart.forEach(item => {
+    databaseConnection.cart.forEach(item => {
         var itemElement = document.createElement('div');
         itemElement.className = 'cart-item';
         itemElement.innerHTML = `
@@ -338,20 +381,107 @@ function renderCartItems() {
 
 // Função para atualizar a interface do usuário do carrinho
 function updateCartUI() {
-    var totalItems = cart.reduce((total, item) => total + item.quantity, 0);
+    var totalItems = databaseConnection.cart.reduce((total, item) => total + item.quantity, 0);
     document.querySelector('.cart-number').textContent = totalItems;
     renderCartItems();
 
     var checkoutButton = document.getElementById('checkoutButton');
-    checkoutButton.disabled = cart.length === 0;
+    checkoutButton.disabled = databaseConnection.cart.length === 0;
 }
 
 document.getElementById('checkoutButton').addEventListener('click', function() {
-    if (cart.length === 0) {
+    if (databaseConnection.cart.length === 0) {
         alert('Seu carrinho está vazio!');
     } else {
         alert('Compra finalizada com sucesso!');
-        cart = []; // Esvazia o carrinho
+        databaseConnection.removeCart(); // Esvazia o carrinho
         updateCartUI(); // Atualiza a interface do usuário
     }
 });
+
+function cacheCurrentUser(email) {
+    cacheData = {
+        email: email,
+        validUntil: new Date().getTime() + 300000 // 5 minutos
+    }
+
+    localStorage.setItem('currentUser', JSON.stringify(cacheData));
+}
+
+// Função para cadastrar um novo usuário
+function register() {
+    var email = document.getElementById('email').value;
+    var password = document.getElementById('password').value;
+    var confirmPassword = document.getElementById('confirmPassword').value;
+    var name = document.getElementById('name').value;
+    var address = document.getElementById('address').value;
+
+    if (password !== confirmPassword) {
+        alert('As senhas não conferem!');
+        return;
+    }
+
+    databaseUser = databaseConnection.users.find(user => user.email === email);
+    if (databaseUser) {
+        alert('Já existe um usuário cadastrado com esse e-mail!');
+        return;
+    }
+
+    cacheCurrentUser(email);
+
+    databaseConnection.addUser(email, password, name, address);
+
+    alert('Usuário cadastrado com sucesso!');
+    window.location.href = 'index.html';
+}
+
+// Função para fazer login
+function login() {
+    var email = document.getElementById('loginEmail').value;
+    var password = document.getElementById('loginPassword').value;
+
+    var user = databaseConnection.users.find(user => user.email === email);
+
+    if (!user) {
+        alert('Usuário ou senha incorretos!');
+        return;
+    }
+
+    var validPassword = password && encrypt(email, password) === user.password;
+
+    if (user && validPassword) {
+        cacheCurrentUser(email);
+
+        window.location.href = 'index.html';
+    } else {
+        alert('Usuário ou senha incorretos!');
+    }
+}
+
+// Função para verificar se o usuário está logado
+function checkLogin() {
+    var storedData = localStorage.getItem('currentUser');
+    if (!storedData) {
+        window.location.href = 'login_or_register.html';
+    }
+
+    var currentUser = JSON.parse(storedData);
+    var validUntil = currentUser.validUntil;
+
+    if (validUntil < new Date().getTime()) {
+        localStorage.removeItem('user');
+        alert('Sessão expirada! Faça login novamente.');
+        window.location.href = 'login_or_register.html';
+        return;
+    }
+
+    window.location.href = 'user.html';
+}
+
+// Função para fazer logout
+function logout() {
+    localStorage.removeItem('currentUser');
+    window.location.href = 'index.html';
+}
+
+updateCartUI()
