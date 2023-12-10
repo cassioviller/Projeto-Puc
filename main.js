@@ -92,12 +92,23 @@ class DatabaseConnection {
     }
 
     addCartItem(productId, quantity, price, image) {
-        this.cart.push({
-            id: productId,
-            quantity: quantity, 
-            price: price,
-            image: image
+        var existing = false;
+        this.cart.forEach(item => {
+            if (item.id === productId) {
+                existing = true;
+                item.quantity += quantity;
+                return;
+            }
         });
+
+        if(!existing) {
+            this.cart.push({
+                id: productId,
+                quantity: quantity, 
+                price: price,
+                image: image
+            });
+        }
 
         localStorage.setItem('cart', JSON.stringify(this.cart));
     }
@@ -317,12 +328,7 @@ document.querySelector('.header-cart').addEventListener('click', function() {
 
 // Função para adicionar ao carrinho
 function addToCart(productId, productPrice, productImage) {
-    var existingProduct = databaseConnection.cart.find(product => product.id === productId);
-    if (existingProduct) {
-        existingProduct.quantity += 1;
-    } else {
-        databaseConnection.addCartItem(productId, 1, productPrice, productImage);
-    }
+    databaseConnection.addCartItem(productId, 1, productPrice, productImage);
     updateCartUI();
 }
 
